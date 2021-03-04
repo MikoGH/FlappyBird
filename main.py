@@ -68,8 +68,10 @@ class Column():
 
 	def draw(self,win):
 		''' Выводит на экран изображение колонн '''
-		pygame.draw.rect(win,[25,200,5],(self.x,0,self.width,self.len1))
-		pygame.draw.rect(win,[25,200,5],(self.x,self.y2,self.width,self.len2))
+		pygame.draw.rect(win,[20,180,5],(self.x,0,self.width,self.len1))
+		pygame.draw.rect(win,[20,180,5],(self.x,self.y2,self.width,self.len2))
+		pygame.draw.rect(win,[0,0,0],(self.x,0,self.width,self.len1),4)
+		pygame.draw.rect(win,[0,0,0],(self.x,self.y2,self.width,self.len2),4)
 		
 def check_need_column(columns):
 	''' Проверяет, пора ли добавить новую колонну. Если да, добавляет её '''
@@ -96,9 +98,10 @@ def start():
 	jump = False
 	while run:
 		''' Вывод на экран изображений '''
-		win.fill((5,70,200))
+		win.fill((9,91,174))
+
 		for column in columns:
-			column.draw(win)		
+			column.draw(win)
 		
 		for bird in birds:
 			bird.draw(win)
@@ -132,5 +135,5 @@ def start():
 					jump = True
 
 		pygame.display.update()	
-			
+
 start()
