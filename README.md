@@ -9,5 +9,7 @@
 > Добавлены спавн и движение колонн  
 > Добавлена механика падения и прыжка птицы  
 
+![](https://github.com/MikoGH/FlappyBird/blob/main/VisualUpdates/upd02.gif)
+
 ---  
 
