@@ -26,18 +26,24 @@ class Bird():
 	def __init__(self,i):
 		global win_height
 		self.index = i
-		self.img = pygame.image.load('bird.png')
+		self.img_main = pygame.image.load('bird.png')
+		self.img_jump = pygame.image.load('jump_bird.png')
+		self.img_fall = pygame.image.load('fall_bird.png')
+		self.img = self.img_main
 		self.x = 200
 		self.y = win_height//2
 		self.pos = [self.x,self.y]
-		self.angle = 0
-		self.rot_img = self.img
 		self.width = self.img.get_width()
 		self.height = self.img.get_height()
+		self.radius = self.width//3
 		self.center = [self.x+self.width//2,self.y+self.height//2]
 		self.y0 = self.y
 		self.t_fall = 0
 		self.is_alive = True
+
+	def rotate_img(self):
+		''' Поворачивает картинку на определенный угол '''
+		self.rot_img = pygame.transform.rotate(self.img,self.angle)
 
 	def draw(self,win):
 		''' Выводит на экран изображение птицы '''
@@ -52,6 +58,27 @@ class Bird():
 		''' Отвечает за прыжок птицы '''
 		self.t_fall = 0
 		self.y0 = self.y
+
+	def choice_image(self):
+		''' Выбирает картинку птицы в зависимости от направления движения. Прыгающая, падающая или летящая прямо '''
+		s = - 22*self.t_fall + self.t_fall**2
+		if -50 <= s <= 50:
+			self.img = self.img_main
+		elif s < -50:
+			self.img = self.img_jump
+		elif s > 50:
+			self.img = self.img_fall
+
+	def check_collision(self,columns):
+		''' Проверяет коллизию '''
+		for column in columns:
+			if column.x+column.width > self.x and column.x < self.x + self.width:
+				if self.y < column.y1 or self.y+self.height > column.y2:
+					# self.is_alive = False
+					pygame.draw.circle(win,(210,0,0),[self.x+self.width//2,self.y+self.height//2],17)
+			if self.y < 0 or self.y + self.height > win_height:
+				# self.is_alive = False
+				pygame.draw.circle(win,(210,0,0),[self.x+self.width//2,self.y+self.height//2],17)
 
 
 class Column():
@@ -91,12 +118,12 @@ timer_column = Time()
 timer_bird = Time()
 
 def start():
-	birds = [Bird(i) for i in range(3)]
+	birds = [Bird(i) for i in range(1)]
 	columns = [Column()]
 
 	run = True
 	jump = False
-	while run:
+	while len(birds) > 0:
 		''' Вывод на экран изображений '''
 		win.fill((9,91,174))
 
@@ -104,7 +131,8 @@ def start():
 			column.draw(win)
 		
 		for bird in birds:
-			bird.draw(win)
+			if bird.is_alive:
+				bird.draw(win)
 
 		''' Таймеры '''
 		timer_column.timer()
@@ -115,13 +143,14 @@ def start():
 			for column in columns:
 				column.x -= 1
 
-		if timer_bird.check_timer(30):
-			for bird in birds:
-				bird.move()
-
 		for bird in birds:
-			if jump==True:
-				bird.jump()
+			if bird.is_alive:
+				bird.check_collision(columns)
+				if timer_bird.check_timer(30):
+					bird.move()
+					bird.choice_image()
+				if jump==True:
+					bird.jump()
 
 		check_need_column(columns)		
 
@@ -132,8 +161,8 @@ def start():
 				sys.exit()
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_SPACE:
-					jump = True
+					jump = True 
 
 		pygame.display.update()	
-
+		
 start()
