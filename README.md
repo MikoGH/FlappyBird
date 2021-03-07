@@ -1,6 +1,17 @@
 ### FlappyBird
 
-![](https://github.com/MikoGH/FlappyBird/blob/main/bird.png)  
+![](https://github.com/MikoGH/FlappyBird/blob/main/Birds/bird1.png)  
+
+---  
+
+**Upd 4**  
+*07.03.2021*  
+> Немного увеличена скорость движения колонн  
+> Немного увеличена скорость прыжка и падения птицы  
+> Птицы имеют 8 разных цветов  
+> На экране выводятся: номер поколения, лучший и текущий счёт пройденных колонн  
+
+![](https://github.com/MikoGH/FlappyBird/blob/main/VisualUpdates/upd04.gif)  
 
 ---  
 

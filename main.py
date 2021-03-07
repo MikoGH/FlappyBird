@@ -25,10 +25,9 @@ class Time():
 class Bird():
 	def __init__(self,i):
 		global win_height
-		self.index = i
-		self.img_main = pygame.image.load('bird.png')
-		self.img_jump = pygame.image.load('jump_bird.png')
-		self.img_fall = pygame.image.load('fall_bird.png')
+		self.img_main = pygame.image.load('Birds/bird%d.png'%(i+1))
+		self.img_jump = pygame.image.load('Birds/jump_bird%d.png'%(i+1))
+		self.img_fall = pygame.image.load('Birds/fall_bird%d.png'%(i+1))
 		self.img = self.img_main
 		self.x = 200
 		self.y = win_height//2
@@ -38,6 +37,7 @@ class Bird():
 		self.y0 = self.y
 		self.t_fall = 0
 		self.score = 0
+		self.score_columns = 0
 		self.is_jump = False
 		self.is_alive = True
 		
@@ -90,6 +90,11 @@ class Bird():
 		''' Увеличивает очки живой птицы за пройденное расстояние '''
 		self.score += 0.001
 
+	def get_score_columns(self,columns):
+		for column in columns:
+			if self.x == column.x+column.width:
+				self.score_columns += 1
+
 	def jump(self,i,nets,birds,columns):
 		''' Отвечает за прыжок птицы '''
 		n = nets[i].activate(self.get_data(columns))
@@ -141,6 +146,14 @@ def draw_ground(win):
 	pygame.draw.rect(win,[190,100,3],(0,win_height-ground_height,win_width,ground_height//3))	
 	pygame.draw.rect(win,[0,0,0],(0,win_height-ground_height,win_width,ground_height),4)
 
+def print_text(win,text,width,height,size,font = 'Comic Sans MS',color = (0, 0, 0),bg_color = (80,80,80),bg = False,center = True):
+	font = pygame.font.SysFont(font, size)
+	text = font.render(text, True, color, bg_color) if bg else font.render(text, True, color)
+	text_rect = text.get_rect()
+	if center == True: text_rect.center = (width, height)
+	else: text_rect.midleft = (width, height)
+	win.blit(text, text_rect)
+
 
 win_width = 800
 win_height = 800
@@ -149,7 +162,6 @@ bcground = pygame.image.load('bcground.png')
 win = pygame.display.set_mode((win_width,win_height))
 pygame.display.set_caption('Flappy Bird Neat')
 timer_column = Time()
-# timer_bird = Time()
 
 pygame.init()
 
@@ -179,8 +191,14 @@ def start(genomes,config):
 			column.draw(win)
 		
 		for bird in birds:
-			if bird.is_alive:
-				bird.draw(win)
+			if bird.is_alive: bird.draw(win)
+
+		''' Вывод на экран текста '''
+		print_text(win,'Generation: %d'%(generation),10,20,30,center = False)
+		print_text(win,'Best score: %d'%(best_score),10,60,30,center = False)
+		print_text(win,'%d'%(max(bird.score_columns for bird in birds)),win_width//2+2,60+2,60,color = (0,0,0))
+		print_text(win,'%d'%(max(bird.score_columns for bird in birds)),win_width//2-2,60-2,60,color = (0,0,0))
+		print_text(win,'%d'%(max(bird.score_columns for bird in birds)),win_width//2,60,60,color = (255,250,0))		
 
 		''' Таймеры '''
 		timer_column.timer()
@@ -188,23 +206,25 @@ def start(genomes,config):
 			bird.timer.timer()
 
 		''' Смещение объектов '''
-		if timer_column.check_timer(5):
+		if timer_column.check_timer(3):
 			for column in columns:
 				column.x -= 1
 
 		alives = 0
 		for i,bird in enumerate(birds):
 			if bird.is_alive:
-				alives += 1
-				bird.check_collision(columns)
-				if bird.timer.check_timer(30):
+				alives += 1		
+				if bird.timer.check_timer(24):
+					bird.check_collision(columns)
 					bird.move()
 					bird.choice_image()
 				bird.jump(i,nets,birds,columns)
 				bird.get_score()
+				bird.get_score_columns(columns)
 				genomes[i][1].fitness += bird.score
 
-		check_need_column(columns)		
+		check_need_column(columns)	
+		best_score = max(max(bird.score_columns for bird in birds),best_score)
 
 		''' Обработка событий '''
 		for event in pygame.event.get():
